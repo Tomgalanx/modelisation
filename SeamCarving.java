@@ -74,17 +74,17 @@ public class SeamCarving
 
             for(int j=0;j<image[i].length;j++){
 
-                if(i == 0){
-                    res[i][j] = Math.abs(image[i][j] - image[i+1][j]);
+                if(j == 0){
+                    res[i][j] = Math.abs(image[i][j] - image[i][j+1]);
 
                 }
 
-                else if (i == image.length-1){
-                    res[i][j] = Math.abs(image[i][j]- image[i-1][j]);
+                else if (j == image[i].length-1){
+                    res[i][j] = Math.abs(image[i][j]- image[i][j-1]);
                 }
 
                 else{
-                    res[i][j] = Math.abs(image[i][j]-(image[i-1][j]+image[i+1][j])/2);
+                    res[i][j] = Math.abs(image[i][j]-(image[i][j-1]+image[i][j+1])/2);
                 }
             }
 
@@ -98,17 +98,68 @@ public class SeamCarving
 
 
        int nbNoeud = itr.length * itr[0].length + 2;
-       GraphArrayList graphArrayList = new GraphArrayList(itr.length);
-        Edge edge;
+       GraphArrayList graphArrayList = new GraphArrayList(nbNoeud);
+       Edge edge;
+       int tmp;
+
+       for(int i =1;i<=itr[0].length;i++){
+           edge = new Edge(0,i , 0);
+           graphArrayList.addEdge(edge);
+       }
 
 
-        int compteur =0;
+        int compteur =1;
 
-        for(int i = 1 ; i< itr.length;i++){
-            edge = new Edge(0,i,0);
-            graphArrayList.addEdge(edge);
+        for(int i = 0 ; i< itr.length;i++){
+            for (int j = 0; j < itr[i].length; j++) {
+
+                tmp = compteur;
+
+                if(j == 0 && i < itr.length-1) {
+                    edge = new Edge(tmp,tmp+itr[i].length , itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+
+                    edge = new Edge(tmp, tmp+itr[i].length+1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+                }
+
+                else if (j == itr[i].length-1 && i < itr.length-1){
+
+                    edge = new Edge(tmp,tmp+itr[i].length , itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+
+                    edge = new Edge(tmp, tmp+itr[i].length-1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+
+                }
+
+                else if(i < itr.length-1){
+
+                    edge = new Edge(tmp, tmp+itr[i].length-1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+                    edge = new Edge(tmp,tmp+itr[i].length , itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+                    edge = new Edge(tmp, tmp+itr[i].length+1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+                }else{
+
+
+                    edge = new Edge(tmp, nbNoeud-1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+                }
+
+                compteur++;
+                System.out.println(compteur);
+            }
+
         }
-
 
 
 
