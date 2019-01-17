@@ -1,5 +1,8 @@
 package modelisation;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 class Test
 {
     static boolean visite[];
@@ -38,44 +41,42 @@ class Test
 
     public  static  void testMonGraph(){
 
-        int[][] test = SeamCarving.readpgm("modelisation/ex1.pgm");
+        int[][] test = SeamCarving.readpgm("modelisation/test.pgm");
         test = SeamCarving.interest(test);
 
-        SeamCarving.toGraph(test);
+
+        Graph g =SeamCarving.toGraph(test);
+
+        ArrayList<Integer> triTop = SeamCarving.tritopo(g);
+        ArrayList<Integer> CChemin = new ArrayList<>();
+
+
+        Object[] res =SeamCarving.Bellman(g,0,14,triTop);
+
+        int[] dist = (int[]) res[0];
+        int [] pere = (int[]) res[1];
+
+
+        int last = triTop.get(triTop.size() -1);
+
+        while(last != 0){
+
+            CChemin.add(last);
+            last = pere[last];
+        }
+
+
+        System.out.println("debut chemein");
+        for(int a : CChemin){
+            System.out.println(a);
+        }
+
+        System.out.println("fin chemein");
+
     }
 
     public static void main(String[] args)
     {
-
-        int [][] tab  = new int[3][4];
-        tab[0][0] = 3;
-        tab[0][1] = 11;
-        tab[0][2] = 24;
-        tab[0][3] = 39;
-
-        tab[1][0] = 8;
-        tab[1][1] = 21;
-        tab[1][2] = 29;
-        tab[1][3] = 39;
-
-        tab[2][0] = 200;
-        tab[2][1] = 60;
-        tab[2][2] = 25;
-        tab[2][3] = 0;
-
-        tab =SeamCarving.interest(tab);
-
-        for(int i =0; i<tab.length;i++) {
-
-            for (int j = 0; j < tab[i].length; j++) {
-                System.out.print(tab[i][j]);
-                System.out.print(" ");
-            }
-            System.out.println();
-
-        }
-
-
         testMonGraph();
     }
 }

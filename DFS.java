@@ -1,18 +1,28 @@
 package modelisation;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 class DFS
 {
     
-    public static void botched_dfs1(Graph g, int s){
+    public static ArrayList<Integer> botched_dfs1(Graph g, int s){
 	Stack<Integer> stack = new Stack<Integer>();
 	boolean visited[] = new boolean[g.vertices()];
 	stack.push(s);
-	visited[s] = true;	    	
+	visited[s] = true;
+
+	ArrayList<Integer> res = new ArrayList<>();
+
 	while (!stack.empty()){
+
+		// Pas bon
 	    int u = stack.pop();
+
+
 	    System.out.println(u);
+	    res.add(u);
+
 	    for (Edge e: g.next(u))
 		if (!visited[e.to])
 		    {
@@ -20,6 +30,10 @@ class DFS
 			stack.push(e.to);
 		    }
 	}
+
+
+
+	return res;
     }
 
     public static void botched_dfs2(Graph g, int s){
@@ -40,14 +54,17 @@ class DFS
 	}
     }
     
-    public static void botched_dfs3(Graph g, int s){
+    public static ArrayList<Integer> botched_dfs3(Graph g, int s){
 	Stack<Integer> stack = new Stack<Integer>();
 	boolean visited[] = new boolean[g.vertices()];
+
+	ArrayList<Integer> res = new ArrayList<>();
 	stack.push(s);
 	while (!stack.empty()){
 	    int u = stack.pop();
 	    if (!visited[u]){
 		visited[u] = true;
+		res.add(u);
 		System.out.println(u);
 		for (Edge e: g.next(u))
 		    if (!visited[e.to])
@@ -55,15 +72,20 @@ class DFS
 		
 	    }
 	}
+
+	return res;
     }
 
     
-    public static void botched_dfs4(Graph g, int s){
+    public static ArrayList<Integer> botched_dfs4(Graph g, int s){
+
 	Stack<Integer> stack = new Stack<Integer>();
 	boolean visited[] = new boolean[g.vertices()];
+
+	ArrayList<Integer> res = new ArrayList<>();
 	stack.push(s);
 	visited[s] = true;
-	System.out.println(s);
+	//System.out.println(s);
 	while (!stack.empty()){
 	    boolean end = true;
 	    /* (a) Soit u le sommet en haut de la pile */
@@ -78,15 +100,23 @@ class DFS
 		if (!visited[e.to]) /* (b) */
 		    {
 			visited[e.to] = true;
-			System.out.println(e.to);			
+			//System.out.println(e.to);
 			stack.push(e.to); /*(c) */
 			end = false;
 			break;
 		    }
-	    if (end) /*(d)*/
-		stack.pop();
+	    if (end) { /*(d)*/
+			res.add(stack.pop());
+
+		}
+
+
 	}
-	System.out.println(stack.capacity());
+
+
+
+	return res;
+
     }
 
 
@@ -107,16 +137,23 @@ class DFS
 	g.addEdge(new Edge(4, 3, 1));
 	g.addEdge(new Edge(3, 5, 1));
 	g.addEdge(new Edge(5, 1, 1));
-	botched_dfs1(g, 0);
-	botched_dfs2(g, 0);
-	botched_dfs3(g, 0);
 	botched_dfs4(g, 0);
+	//botched_dfs2(g, 0);
+	//botched_dfs3(g, 0);
+	//botched_dfs4(g, 0);
+
+	g.writeFile("dfs.dot");
 
 
     }
     
     public static void main(String[] args)
     {
-	testGraph();
+
+
+
+
+
+    	testGraph();
     }
 }
