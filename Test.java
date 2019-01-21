@@ -1,7 +1,9 @@
 package modelisation;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 class Test
 {
@@ -41,37 +43,52 @@ class Test
 
     public  static  void testMonGraph(){
 
-        int[][] test = SeamCarving.readpgm("modelisation/test.pgm");
-        test = SeamCarving.interest(test);
+        int[][] test = SeamCarving.readpgm("modelisation/ex3.pgm");
+
+        int[][] interest = SeamCarving.interest(test);
+
+        Graph g =SeamCarving.toGraph(interest);
 
 
-        Graph g =SeamCarving.toGraph(test);
+        for(int i=0;i<50;i++) {
 
-        ArrayList<Integer> triTop = SeamCarving.tritopo(g);
-        ArrayList<Integer> CChemin = new ArrayList<>();
+            ArrayList<Integer> triTop = SeamCarving.tritopo(g);
+            ArrayList<Integer> CChemin = new ArrayList<>();
+
+            Object[] res = SeamCarving.Bellman(g, 0, 13, triTop);
+
+            int[] dist = (int[]) res[0];
+            int[] pere = (int[]) res[1];
 
 
-        Object[] res =SeamCarving.Bellman(g,0,14,triTop);
+            int last = triTop.get(triTop.size() - 1);
 
-        int[] dist = (int[]) res[0];
-        int [] pere = (int[]) res[1];
+            while (last != 0) {
+
+                CChemin.add(last);
+                last = pere[last];
+            }
 
 
-        int last = triTop.get(triTop.size() -1);
+            //System.out.println("debut chemein");
+            for (int a : CChemin) {
+              //  System.out.println(a);
+            }
 
-        while(last != 0){
+            //System.out.println("fin chemein");
 
-            CChemin.add(last);
-            last = pere[last];
+
+            g = SeamCarving.toGraph(interest, CChemin);
+
+            test = SeamCarving.imageModifier(test, CChemin);
+
+            try {
+                SeamCarving.writepgm(test, "monImage");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-
-        System.out.println("debut chemein");
-        for(int a : CChemin){
-            System.out.println(a);
-        }
-
-        System.out.println("fin chemein");
 
     }
 

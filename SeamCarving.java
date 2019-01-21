@@ -6,6 +6,9 @@ import java.util.*;
 public class SeamCarving
 {
 
+    private static final int MAXVAL = 255;
+
+
     public static int[][] readpgm(String fn)
     {
         try {
@@ -34,13 +37,47 @@ public class SeamCarving
 
         catch(Throwable t) {
             t.printStackTrace(System.err) ;
-            System.out.println("erreur ");
+           // System.out.println("erreur ");
             return null;
         }
     }
 
 
     public static void writepgm(int[][] image, String filename) throws IOException {
+
+        PrintWriter pw = new PrintWriter(filename+".pgm");
+        int width = image[0].length;
+        int height = image.length;
+
+        // magic number, width, height, and maxval
+        pw.println("P2");
+        pw.println(width + " " + height);
+        pw.println(MAXVAL);
+
+        // print out the data, limiting the line lengths to 70 characters
+        int lineLength = 0;
+        for (int i = 0; i < height; ++i)
+        {
+            for (int j = 0; j < width; ++j)
+            {
+                int value = image[i][j];
+
+                // if we are going over 70 characters on a line,
+                // start a new line
+                String stringValue = "" + value;
+                int currentLength = stringValue.length() + 1;
+                if (currentLength + lineLength > 70)
+                {
+                    pw.println();
+                    lineLength = 0;
+                }
+                lineLength += currentLength;
+                pw.print(value + " ");
+            }
+        }
+        pw.close();
+
+        /*
         // On Ouvre un fichier
         File ff=new File(filename+".pgm");
 
@@ -60,6 +97,8 @@ public class SeamCarving
 
 
         ffw.close();
+
+        */
 
     }
 
@@ -96,7 +135,6 @@ public class SeamCarving
 
     public static Graph toGraph(int[][] itr){
 
-
         int nbNoeud = itr.length * itr[0].length + 2;
         GraphArrayList graphArrayList = new GraphArrayList(nbNoeud);
         Edge edge;
@@ -115,43 +153,40 @@ public class SeamCarving
 
                 tmp = compteur;
 
-                if(j == 0 && i < itr.length-1) {
-                    edge = new Edge(tmp,tmp+itr[i].length , itr[i][j]);
-                    graphArrayList.addEdge(edge);
+
+                    if (j == 0 && i < itr.length - 1) {
+                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                        graphArrayList.addEdge(edge);
+
+                        edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
+                        graphArrayList.addEdge(edge);
+                    } else if (j == itr[i].length - 1 && i < itr.length - 1) {
+
+                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                        graphArrayList.addEdge(edge);
 
 
-                    edge = new Edge(tmp, tmp+itr[i].length+1, itr[i][j]);
-                    graphArrayList.addEdge(edge);
-                }
-
-                else if (j == itr[i].length-1 && i < itr.length-1){
-
-                    edge = new Edge(tmp,tmp+itr[i].length , itr[i][j]);
-                    graphArrayList.addEdge(edge);
+                        edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
+                        graphArrayList.addEdge(edge);
 
 
-                    edge = new Edge(tmp, tmp+itr[i].length-1, itr[i][j]);
-                    graphArrayList.addEdge(edge);
+                    } else if (i < itr.length - 1) {
+
+                        edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
+                        graphArrayList.addEdge(edge);
+
+                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                        graphArrayList.addEdge(edge);
+
+                        edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
+                        graphArrayList.addEdge(edge);
+
+                    } else {
 
 
-                }
+                        edge = new Edge(tmp, nbNoeud - 1, itr[i][j]);
+                        graphArrayList.addEdge(edge);
 
-                else if(i < itr.length-1){
-
-                    edge = new Edge(tmp, tmp+itr[i].length-1, itr[i][j]);
-                    graphArrayList.addEdge(edge);
-
-                    edge = new Edge(tmp,tmp+itr[i].length , itr[i][j]);
-                    graphArrayList.addEdge(edge);
-
-                    edge = new Edge(tmp, tmp+itr[i].length+1, itr[i][j]);
-                    graphArrayList.addEdge(edge);
-
-                }else{
-
-
-                    edge = new Edge(tmp, nbNoeud-1, itr[i][j]);
-                    graphArrayList.addEdge(edge);
 
                 }
 
@@ -162,7 +197,7 @@ public class SeamCarving
 
 
 
-        graphArrayList.writeFile("monTest.dot");
+       // graphArrayList.writeFile("monTest.dot");
 
         return graphArrayList;
     }
@@ -178,8 +213,6 @@ public class SeamCarving
 
         return tmp;
     }
-
-
 
 
     public static Object[] Bellman(Graph g, int s,int t, ArrayList<Integer> order){
@@ -200,27 +233,141 @@ public class SeamCarving
             for(Edge e : noeud){
 
                 if (e.from == ordre) {
-                    dist[e.to] = Math.min(dist[e.to], dist[e.from] + e.cost);
-                    pere[e.to] = e.from;
+
+                    if (dist[e.to] != Math.min(dist[e.to], dist[e.from] + e.cost)) {
+                        dist[e.to] = dist[e.from] + e.cost;
+                        pere[e.to] = e.from;
+
+                    }
                 }
-
-
             }
-
-
-
         }
 
 
         int index =0;
         for(int res : dist){
 
-            System.out.println(index +" "+res);
+           // System.out.println(index +" "+res);
             index ++;
         }
 
         return new Object[]{dist,pere};
     }
 
+
+    public static Graph toGraph(int[][] itr, ArrayList<Integer> chemin){
+
+        int nbNoeud = itr.length * itr[0].length + 2;
+        GraphArrayList graphArrayList = new GraphArrayList(nbNoeud);
+        Edge edge;
+        int tmp;
+
+        for(int i =1;i<=itr[0].length;i++){
+            edge = new Edge(0,i , 0);
+            if (!chemin.contains(i))
+            graphArrayList.addEdge(edge);
+        }
+
+
+        int compteur =1;
+
+        for(int i = 0 ; i< itr.length;i++){
+            for (int j = 0; j < itr[i].length; j++) {
+
+                tmp = compteur;
+
+
+                if (!chemin.contains(tmp)) {
+
+
+                    if (j == 0 && i < itr.length - 1) {
+                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                        if (!chemin.contains(tmp + itr[i].length))
+                            graphArrayList.addEdge(edge);
+
+                        edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
+                        if (!chemin.contains(tmp + itr[i].length + 1))
+                            graphArrayList.addEdge(edge);
+                    } else if (j == itr[i].length - 1 && i < itr.length - 1) {
+
+                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                        if (!chemin.contains(tmp + itr[i].length))
+                            graphArrayList.addEdge(edge);
+
+
+                        edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
+                        if (!chemin.contains(tmp + itr[i].length - 1))
+                            graphArrayList.addEdge(edge);
+
+
+                    } else if (i < itr.length - 1) {
+
+                        edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
+                        if (!chemin.contains(tmp + itr[i].length - 1))
+                            graphArrayList.addEdge(edge);
+
+                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                        if (!chemin.contains(tmp + itr[i].length))
+                            graphArrayList.addEdge(edge);
+
+                        edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
+                        if (!chemin.contains(tmp + itr[i].length + 1))
+                            graphArrayList.addEdge(edge);
+
+                    } else {
+
+
+                        edge = new Edge(tmp, nbNoeud - 1, itr[i][j]);
+                        graphArrayList.addEdge(edge);
+
+
+                    }
+
+                }
+                compteur++;
+            }
+
+        }
+
+
+
+        //graphArrayList.writeFile("monTest.dot");
+
+        return graphArrayList;
+    }
+
+    public static int[][] imageModifier(int[][] image, ArrayList<Integer> chemin){
+
+
+        int[][] res = new int[image.length][image[0].length-1];
+
+        int compteur = 1;
+
+        for(int i = 0 ; i< image.length;i++) {
+            for (int j = 0; j < image[i].length; j++) {
+
+                if (j != image[i].length - 1) {
+                    if (chemin.contains(compteur)) {
+
+                        res[i][j] = image[i][j + 1];
+
+                    } else {
+
+                        res[i][j] = image[i][j];
+
+                    }
+
+                   // System.out.print(res[i][j] + " ");
+                }
+
+                compteur++;
+
+            }
+
+            //System.out.println();
+        }
+
+        return res;
+    }
 
 }
