@@ -1,9 +1,7 @@
 package modelisation;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 class Test
 {
@@ -43,19 +41,21 @@ class Test
 
     public  static  void testMonGraph(){
 
-        int[][] test = SeamCarving.readpgm("modelisation/ex3.pgm");
+        int[][] test = SeamCarving.readpgm("modelisation/ex1.pgm");
 
         int[][] interest = SeamCarving.interest(test);
 
         Graph g =SeamCarving.toGraph(interest);
 
+        ArrayList<Integer> CChemin = new ArrayList<>();
 
         for(int i=0;i<50;i++) {
+            int nbNoeud = interest.length * interest[0].length + 2;
 
             ArrayList<Integer> triTop = SeamCarving.tritopo(g);
-            ArrayList<Integer> CChemin = new ArrayList<>();
 
-            Object[] res = SeamCarving.Bellman(g, 0, 13, triTop);
+
+            Object[] res = SeamCarving.Bellman(g, 0, nbNoeud, triTop);
 
             int[] dist = (int[]) res[0];
             int[] pere = (int[]) res[1];
@@ -70,25 +70,19 @@ class Test
             }
 
 
-            //System.out.println("debut chemein");
-            for (int a : CChemin) {
-              //  System.out.println(a);
-            }
-
-            //System.out.println("fin chemein");
-
-
             g = SeamCarving.toGraph(interest, CChemin);
 
             test = SeamCarving.imageModifier(test, CChemin);
 
-            try {
-                SeamCarving.writepgm(test, "monImage");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+
         }
 
+        try {
+            SeamCarving.writepgm(test, "monImage");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

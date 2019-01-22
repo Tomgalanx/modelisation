@@ -32,6 +32,10 @@ public class SeamCarving
                 im[count / width][count % width] = s.nextInt();
                 count++;
             }
+
+            d.close();
+            f.close();
+
             return im;
         }
 
@@ -40,12 +44,14 @@ public class SeamCarving
            // System.out.println("erreur ");
             return null;
         }
+
+
     }
 
 
     public static void writepgm(int[][] image, String filename) throws IOException {
 
-        PrintWriter pw = new PrintWriter(filename+".pgm");
+        PrintWriter pw = new PrintWriter("src/modelisation/"+filename+".pgm");
         int width = image[0].length;
         int height = image.length;
 
@@ -197,7 +203,7 @@ public class SeamCarving
 
 
 
-       // graphArrayList.writeFile("monTest.dot");
+       graphArrayList.writeFile("monTest.dot");
 
         return graphArrayList;
     }
@@ -331,7 +337,7 @@ public class SeamCarving
 
 
 
-        //graphArrayList.writeFile("monTest.dot");
+        graphArrayList.writeFile("monTest.dot");
 
         return graphArrayList;
     }
@@ -356,15 +362,11 @@ public class SeamCarving
                         res[i][j] = image[i][j];
 
                     }
-
-                   // System.out.print(res[i][j] + " ");
                 }
 
                 compteur++;
 
             }
-
-            //System.out.println();
         }
 
         return res;
