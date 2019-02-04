@@ -2,6 +2,7 @@ package modelisation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 class Test
 {
@@ -15,27 +16,55 @@ class Test
                 dfs(g,e.to);
     }
 
-    public static void testGraph()
-    {
-        int n = 5;
-        int i,j;
-        GraphArrayList g = new GraphArrayList(n*n+2);
+    public static void testGraph(String nom) throws IOException {
 
-        for (i = 0; i < n-1; i++)
-            for (j = 0; j < n ; j++)
-                g.addEdge(new Edge(n*i+j, n*(i+1)+j, 1664 - (i+j)));
+        // On met l'image sous forme d'un tableau de deux dimensions
+        int[][] test = SeamCarving.readpgm("modelisation/"+nom);
 
-        for (j = 0; j < n ; j++)
-            g.addEdge(new Edge(n*(n-1)+j, n*n, 666));
+        // On initialise le nombre de noeuds du graph
+        int nbNoeud = test.length * test[0].length + 2;
 
-        for (j = 0; j < n ; j++)
-            g.addEdge(new Edge(n*n+1, j, 0));
+        // On supprime 50 colonne de l'image
+        for (int i = 0; i < 50; i++) {
 
-        g.addEdge(new Edge(13,17,1337));
-        g.writeFile("test.dot");
-        // dfs à partir du sommet 3
-        visite = new boolean[n*n+2];
-        dfs(g, 3);
+            System.out.println("Nombre de ligne traité :"+i);
+
+            // On genere un tableau a deux dimensions qui contient les facteurs d'interet pour chaque pixel
+            int[][] interest = SeamCarving.interest(test);
+
+            // On genere le graph
+            Graph g = SeamCarving.toGraph(interest);
+
+            // On applique le tri topologique sur le graph genere
+            ArrayList<Integer> tritopo = SeamCarving.tritopo(g);
+
+            // On applique Bellman pour recuperer le chemin de cout minimal
+            Integer[] parents = SeamCarving.Bellman(g, 0, nbNoeud, tritopo);
+
+            ArrayList<Integer> chemin = new ArrayList<>(g.vertices());
+
+            // On cherche les noeuds qui constituent le chemin de cout minimal
+            Integer parcours = parents[g.vertices() - 1];
+
+            while (parcours != -1) {
+                chemin.add(parcours);
+                parcours = parents[parcours];
+            }
+
+            chemin.remove(chemin.size()-1);
+            chemin.remove(new Integer(0));
+
+
+            Collections.reverse(chemin);
+
+            // On obtient le tableau avec les colonne modifie et on refait la boucle
+            test = SeamCarving.imageModifier(test, chemin);
+        }
+
+        // On ecrit le fichier .pgm
+        SeamCarving.writepgm(test, nom);
+
+        System.out.println("\n L'image a été réduite sous le nom de "+nom);
     }
 
 
@@ -49,25 +78,19 @@ class Test
 
         ArrayList<Integer> CChemin = new ArrayList<>();
 
+
+
         for(int i=0;i<50;i++) {
             int nbNoeud = interest.length * interest[0].length + 2;
 
             ArrayList<Integer> triTop = SeamCarving.tritopo(g);
 
 
-            Object[] res = SeamCarving.Bellman(g, 0, nbNoeud, triTop);
+            //ArrayList<Integer> pere = SeamCarving.Bellman(g, 0, nbNoeud, triTop);
 
-            int[] dist = (int[]) res[0];
-            int[] pere = (int[]) res[1];
 
 
             int last = triTop.get(triTop.size() - 1);
-
-            while (last != 0) {
-
-                CChemin.add(last);
-                last = pere[last];
-            }
 
 
             g = SeamCarving.toGraph(interest, CChemin);
@@ -86,8 +109,17 @@ class Test
 
     }
 
-    public static void main(String[] args)
-    {
-        testMonGraph();
+    public static void main(String[] args) throws IOException {
+
+        if(args.length < 1){
+            System.out.println("Vous devez indiquer le nom de l'image");
+        }
+        else {
+
+            if(!args[0].contains(".pgm"))
+                System.out.println("L'image doit etre au format .pgm");
+            else
+                testGraph(args[0]);
+        }
     }
 }

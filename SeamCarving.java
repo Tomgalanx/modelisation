@@ -51,7 +51,7 @@ public class SeamCarving
 
     public static void writepgm(int[][] image, String filename) throws IOException {
 
-        PrintWriter pw = new PrintWriter("src/modelisation/"+filename+".pgm");
+        PrintWriter pw = new PrintWriter("src/modelisation/"+filename+"_réduite.pgm");
         int width = image[0].length;
         int height = image.length;
 
@@ -83,29 +83,6 @@ public class SeamCarving
         }
         pw.close();
 
-        /*
-        // On Ouvre un fichier
-        File ff=new File(filename+".pgm");
-
-        ff.createNewFile();
-
-        FileWriter ffw=new FileWriter(ff);
-
-
-        for(int i =0; i<image.length;i++){
-
-            for(int j=0;j<image[i].length;j++){
-                ffw.write(image[i][j]);
-
-            }
-
-        }
-
-
-        ffw.close();
-
-        */
-
     }
 
     // renvoie un tableau de la meme taille, contenant, pour chaque pixel, son facteur d’interet
@@ -114,20 +91,21 @@ public class SeamCarving
 
         int[][] res = new int[image.length][image[0].length];
 
-
+        // On parcours le tableau de l'image
         for(int i =0; i<image.length;i++){
 
             for(int j=0;j<image[i].length;j++){
 
+                // le pixel est en d´ebut de ligne , le facteur d'interet est la difference entre le pixel et le pixel suivant
                 if(j == 0){
                     res[i][j] = Math.abs(image[i][j] - image[i][j+1]);
 
                 }
-
+                // le pixel au bout de la ligne , le facteur d'interet est la difference entre le pixel et le pixel precedent
                 else if (j == image[i].length-1){
                     res[i][j] = Math.abs(image[i][j]- image[i][j-1]);
                 }
-
+                // le facteur d’interet est la difference entre la valeur du pixel, et la moyenne des valeurs de ses voisins de gauche et de droite
                 else{
                     res[i][j] = Math.abs(image[i][j]-(image[i][j-1]+image[i][j+1])/2);
                 }
@@ -139,59 +117,69 @@ public class SeamCarving
     }
 
 
-    public static Graph toGraph(int[][] itr){
+    // Cree le graph depuis un tableau
+    public static Graph toGraph(int[][] itr) {
 
+        // On initialise le nombre de noeuds du graph
         int nbNoeud = itr.length * itr[0].length + 2;
         GraphArrayList graphArrayList = new GraphArrayList(nbNoeud);
         Edge edge;
         int tmp;
 
-        for(int i =1;i<=itr[0].length;i++){
-            edge = new Edge(0,i , 0);
+        // On cree les arretes entre la racine et les noeuds de la premiere ligne avec un cout a 0
+        for (int i = 1; i <= itr[0].length; i++) {
+            edge = new Edge(0, i, 0);
             graphArrayList.addEdge(edge);
         }
 
 
-        int compteur =1;
+        int compteur = 1;
 
-        for(int i = 0 ; i< itr.length;i++){
+        // On cree les autres arretes
+        for (int i = 0; i < itr.length; i++) {
             for (int j = 0; j < itr[i].length; j++) {
 
                 tmp = compteur;
 
+                // On est au debut de la ligne et avant l'avant derniere ligne
+                if (j == 0 && i < itr.length - 1) {
+                    edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                    graphArrayList.addEdge(edge);
 
-                    if (j == 0 && i < itr.length - 1) {
-                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
-                        graphArrayList.addEdge(edge);
+                    edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+                }
+                // On est a la fin de la ligne et avant l'avant derniere ligne
+                else if (j == itr[i].length - 1 && i < itr.length - 1) {
 
-                        edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
-                        graphArrayList.addEdge(edge);
-                    } else if (j == itr[i].length - 1 && i < itr.length - 1) {
-
-                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
-                        graphArrayList.addEdge(edge);
-
-
-                        edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
-                        graphArrayList.addEdge(edge);
+                    edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                    graphArrayList.addEdge(edge);
 
 
-                    } else if (i < itr.length - 1) {
-
-                        edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
-                        graphArrayList.addEdge(edge);
-
-                        edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
-                        graphArrayList.addEdge(edge);
-
-                        edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
-                        graphArrayList.addEdge(edge);
-
-                    } else {
+                    edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
 
 
-                        edge = new Edge(tmp, nbNoeud - 1, itr[i][j]);
-                        graphArrayList.addEdge(edge);
+                }
+                // On est juste avant l'avant derniere ligne
+                else if (i < itr.length - 1) {
+
+                    edge = new Edge(tmp, tmp + itr[i].length - 1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+                    edge = new Edge(tmp, tmp + itr[i].length, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+                    edge = new Edge(tmp, tmp + itr[i].length + 1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
+
+                }
+                // on est a l'avant derniere ligne
+                else {
+
+
+                    edge = new Edge(tmp, nbNoeud - 1, itr[i][j]);
+                    graphArrayList.addEdge(edge);
 
 
                 }
@@ -202,8 +190,7 @@ public class SeamCarving
         }
 
 
-
-       graphArrayList.writeFile("monTest.dot");
+        //graphArrayList.writeFile("monTest.dot");
 
         return graphArrayList;
     }
@@ -211,56 +198,82 @@ public class SeamCarving
 
     public static ArrayList tritopo(Graph g){
 
-
-
-
+        // Application du DFS
         ArrayList<Integer> tmp = DFS.botched_dfs4(g,0);
+        // Et on inverse la liste
         Collections.reverse(tmp);
 
         return tmp;
     }
 
-
-    public static Object[] Bellman(Graph g, int s,int t, ArrayList<Integer> order){
+    // On cherche le chemin de cout minimal
+    public static Integer[] Bellman(Graph g, int s, int t, ArrayList<Integer> order){
 
         int V = g.vertices();
         int dist[] = new int[V];
-        int pere[] = new int[V];
+        Integer pere[] = new Integer[V];
+
+        for(int i=0;i<pere.length;i++){
+            pere[i] =-1;
+        }
 
         for (int i=0; i<V; i++)
             dist[i] = Integer.MAX_VALUE;
 
         dist[s] = 0;
 
-        for(int ordre : order) {
+        for (Integer ordre : order){
 
-            Iterable<Edge> noeud = g.next(ordre);
+            for (Edge e : g.prev(ordre)) {
 
-            for(Edge e : noeud){
-
-                if (e.from == ordre) {
-
-                    if (dist[e.to] != Math.min(dist[e.to], dist[e.from] + e.cost)) {
-                        dist[e.to] = dist[e.from] + e.cost;
-                        pere[e.to] = e.from;
-
-                    }
+                // Si la distance trouver est plus petite que la distance precedente on la remplace et on memorise le noeud
+                if ( dist[e.to] != Math.min(dist[e.to], dist[e.from] + e.cost)) {
+                    dist[ordre] = dist[e.from] + e.cost;
+                    pere[ordre] = e.from;
                 }
             }
         }
 
 
-        int index =0;
-        for(int res : dist){
-
-           // System.out.println(index +" "+res);
-            index ++;
-        }
-
-        return new Object[]{dist,pere};
+        return pere;
     }
 
 
+
+    // Retourne le tableau image modifie sans le chemin donnee
+    public static int[][] imageModifier(int[][] image, ArrayList<Integer> chemin){
+
+
+        int[][] res = new int[image.length][image[0].length - 1];
+
+        int compteur =1;
+
+        for (int i = 0; i < image.length; i++) {
+            boolean finded = false;
+            for (int j = 0; j < image[0].length; j++) {
+
+                // Si on trouve la valeur du compteur dans le chemin on decale les valeurs du tableau
+                if (!chemin.contains(compteur)) {
+                    if(finded) {
+                        res[i][j-1] = image[i][j];
+                    }
+                    else {
+                        res[i][j] = image[i][j];
+                    }
+
+                }
+                else{
+                    finded = true;
+                }
+
+                compteur++;
+            }
+        }
+
+        return res;
+    }
+
+    // Creer le graph depuis un tableau sans qu'il contient le chemin donnee en parametre
     public static Graph toGraph(int[][] itr, ArrayList<Integer> chemin){
 
         int nbNoeud = itr.length * itr[0].length + 2;
@@ -271,7 +284,7 @@ public class SeamCarving
         for(int i =1;i<=itr[0].length;i++){
             edge = new Edge(0,i , 0);
             if (!chemin.contains(i))
-            graphArrayList.addEdge(edge);
+                graphArrayList.addEdge(edge);
         }
 
 
@@ -336,40 +349,10 @@ public class SeamCarving
         }
 
 
-
+        // On genere le fichier .dot
         graphArrayList.writeFile("monTest.dot");
 
         return graphArrayList;
-    }
-
-    public static int[][] imageModifier(int[][] image, ArrayList<Integer> chemin){
-
-
-        int[][] res = new int[image.length][image[0].length-1];
-
-        int compteur = 1;
-
-        for(int i = 0 ; i< image.length;i++) {
-            for (int j = 0; j < image[i].length; j++) {
-
-                if (j != image[i].length - 1) {
-                    if (chemin.contains(compteur)) {
-
-                        res[i][j] = image[i][j + 1];
-
-                    } else {
-
-                        res[i][j] = image[i][j];
-
-                    }
-                }
-
-                compteur++;
-
-            }
-        }
-
-        return res;
     }
 
 }
