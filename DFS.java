@@ -65,14 +65,16 @@ class DFS
 	    if (!visited[u]){
 		visited[u] = true;
 		res.add(u);
-		System.out.println(u);
+		//System.out.println(u);
 		for (Edge e: g.next(u))
 		    if (!visited[e.to])
 			   stack.push(e.to);
 		
 	    }
+
 	}
 
+	System.out.println("capacite de la pile : " + stack.capacity());
 	return res;
     }
 
@@ -96,20 +98,20 @@ class DFS
 	   
 	    /* (a) */
 	    int u = stack.peek();
-	    for (Edge e: g.next(u))
-		if (!visited[e.to]) /* (b) */
-		    {
-			visited[e.to] = true;
-			//System.out.println(e.to);
-			stack.push(e.to); /*(c) */
-			end = false;
-			break;
-		    }
+
+	    for (Edge e: g.next(u)) {
+			System.out.println(e.to);
+			if (!visited[e.to]) /* (b) */ {
+				visited[e.to] = true;
+				//System.out.println(e.to);
+				stack.push(e.to); /*(c) */
+				end = false;
+				break;
+			}
+		}
 	    if (end) { /*(d)*/
 			res.add(stack.pop());
-
 		}
-
 
 	}
 
@@ -177,14 +179,60 @@ class DFS
 
 
     }
+
+	public static void testDFS3()
+	{
+		int nbNoeud = 100;
+		GraphArrayList graphArrayList = new GraphArrayList(nbNoeud);
+		Edge edge;
+
+		for(int i = 0; i < nbNoeud-1 ; i++){
+
+			edge = new Edge(i, i+1, 0);
+			graphArrayList.addEdge(edge);
+		}
+
+		for(int i = 0 ; i < nbNoeud-1 ; i++) {
+
+			for(int j = 0 ; j < nbNoeud-1 ; j++) {
+
+				edge = new Edge(i, j, 0);
+				graphArrayList.addEdge(edge);
+			}
+		}
+
+		botched_dfs3(graphArrayList,0);
+
+	}
+
+	public static void testDFS4()
+	{
+		int nbNoeud = 100;
+		GraphArrayList graphArrayList = new GraphArrayList(nbNoeud);
+		Edge edge;
+
+		for(int i = 0; i < nbNoeud-1 ; i++){
+
+			edge = new Edge(i, i+1, 0);
+			graphArrayList.addEdge(edge);
+		}
+
+		botched_dfs4(graphArrayList,0);
+
+	}
     
     public static void main(String[] args)
     {
+		System.out.println("Exemple DFS3 :");
+		testDFS3();
+		System.out.println("Fin exemple DFS3");
+		System.out.println("-------------------------------------------------------------------------");
+		System.out.println("Exemple DFS4 :");
+		testDFS4();
+		System.out.println("Fin exemple DFS4");
+		System.out.println("-------------------------------------------------------------------------");
 
-
-
-
-
+		System.out.println("Test Graph");
     	testGraph();
     }
 }

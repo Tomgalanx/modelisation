@@ -162,7 +162,7 @@ class Test
     public static void main(String[] args) throws IOException {
 
         if(args.length < 2){
-            System.out.println("Vous devez indiquer le nom de l'image qui est rangé dans le dossier image, R pour réduire et A pour augmenter");
+            System.out.println("Vous devez indiquer le nom de l'image qui est rangé dans le dossier image, RL pour réduire les lignes, RC pour réduire les colonnes et A pour augmenter");
         }
         else {
 

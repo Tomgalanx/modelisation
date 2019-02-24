@@ -9,7 +9,6 @@ class GraphImplicit extends Graph{
     protected int h;
     protected int N;
 
-
     /*
         * Pour cette classe nous avons change la modelisation
         * Nous avons decide de ne plus mettre 0 en premiere case mais NbNoeud +1

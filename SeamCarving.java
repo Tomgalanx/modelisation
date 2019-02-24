@@ -490,7 +490,7 @@ public class SeamCarving
                 int indice = i*image[i].length +j;
 
                 // Si le sommet du graphe est dans le plus court chemin
-                if (!chemin.contains(i * image[0].length + j)) {
+                if (!chemin.contains(indice)) {
                     // Alors on decale tous
                     if(trouve) {
                         res[i-1][j] = image[i][j];
