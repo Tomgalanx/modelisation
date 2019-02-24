@@ -200,7 +200,7 @@ class Test
 
             // On genere le graph
             //Graph g = SeamCarving.toGraph(interest);
-            Graph g =new GraphImplicit(interest,interest[0].length,interest.length);
+            Graph g =new GraphImpliciteLine(interest,interest[0].length,interest.length);
 
 
             // On applique le tri topologique sur le graph genere

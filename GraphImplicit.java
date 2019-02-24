@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 class GraphImplicit extends Graph{
 
-    private  int[][] interest;
-    private  int w;
-    private  int h;
-    private int N;
+    protected int[][] interest;
+    protected int w;
+    protected int h;
+    protected int N;
 
 
     /*
@@ -24,6 +24,7 @@ class GraphImplicit extends Graph{
         // +2 car il y a le premier sommet et le dernier
         this.N = h * w +2;
     }
+
 
     public int vertices(){
         return N;
@@ -118,7 +119,7 @@ class GraphImplicit extends Graph{
             return edges;
         }
 
-        // Si on est sur la premier ligne
+        // Si on est sur la premiere ligne
         if(v < w){
             // On retourne les arretes vers le premier sommet de cout 0
             edges.add(new Edge(N-2, v, 0));

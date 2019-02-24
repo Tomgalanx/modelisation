@@ -282,7 +282,6 @@ public class SeamCarving
 
                 // Si on trouve la valeur du compteur dans le chemin on decale les valeurs du tableau
                 if (!chemin.contains(compteur)) {
-                    //System.out.println(compteur);
                     if(finded) {
                         res[i][j-1] = image[i][j];
                     }
@@ -311,13 +310,13 @@ public class SeamCarving
         int compteur =1;
 
         for (int i = 0; i < image.length; i++) {
-            boolean finded = false;
+            boolean trouve = false;
             for (int j = 0; j < image[0].length; j++) {
 
 
                 // Si on trouve la valeur du compteur dans le chemin on decale les valeurs du tableau
                 if (!chemin.contains(compteur)) {
-                    if(finded) {
+                    if(trouve) {
                         res[i][j+1] = image[i][j];
                     }
                     else {
@@ -326,7 +325,7 @@ public class SeamCarving
 
                 }
                 else{
-                    finded = true;
+                    trouve = true;
                 }
 
 
@@ -480,16 +479,19 @@ public class SeamCarving
 
     public static int[][] imageModifierLine(int[][] image, ArrayList<Integer> chemin) {
 
+        // On enleve une ligne de ligne originale
         int[][] res = new int[image.length-1][image[0].length];
-
-        int compteur =0;
 
         for (int j = 0; j < image[0].length; j++) {
             boolean trouve = false;
-            for (int i = 0; i < image.length; i++) {
+            for (int i = 0; i < image.length-1; i++) {
 
-                // Si on trouve la valeur du compteur dans le chemin on decale les valeurs du tableau
-                if (!chemin.contains(compteur)) {
+                // On retrouve le numero de la case dans le graphe
+                int indice = i*image[i].length +j;
+
+                // Si le sommet du graphe est dans le plus court chemin
+                if (!chemin.contains(i * image[0].length + j)) {
+                    // Alors on decale tous
                     if(trouve) {
                         res[i-1][j] = image[i][j];
                     }
@@ -501,8 +503,6 @@ public class SeamCarving
                 else{
                     trouve = true;
                 }
-
-                compteur++;
             }
         }
 
