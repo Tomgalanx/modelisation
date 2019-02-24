@@ -51,16 +51,15 @@ public class SeamCarving
 
     public static void writepgm(int[][] image, String filename) throws IOException {
 
-        PrintWriter pw = new PrintWriter("src/modelisation/"+filename+"_réduite.pgm");
+        PrintWriter pw = new PrintWriter("src/modelisation/image/"+filename+"_réduite.pgm");
         int width = image[0].length;
         int height = image.length;
 
-        // magic number, width, height, and maxval
+
         pw.println("P2");
         pw.println(width + " " + height);
         pw.println(MAXVAL);
 
-        // print out the data, limiting the line lengths to 70 characters
         int lineLength = 0;
         for (int i = 0; i < height; ++i)
         {
@@ -68,8 +67,6 @@ public class SeamCarving
             {
                 int value = image[i][j];
 
-                // if we are going over 70 characters on a line,
-                // start a new line
                 String stringValue = "" + value;
                 int currentLength = stringValue.length() + 1;
                 if (currentLength + lineLength > 70)
@@ -116,6 +113,36 @@ public class SeamCarving
         return res;
     }
 
+
+    // Excatement la meme methode que pour les colonnes mais on inverse avec les lignes
+    public static int[][] interestLine(int[][] image){
+
+        int[][] res = new int[image.length][image[0].length];
+
+        // On parcours le tableau de l'image
+        for(int i =0; i<image.length;i++){
+
+            for(int j=0;j<image[i].length;j++){
+
+                // le pixel est en d´ebut de ligne , le facteur d'interet est la difference entre le pixel et le pixel suivant
+                if(i == 0){
+                    res[i][j] = Math.abs(image[i][j] - image[i+1][j]);
+
+                }
+                // le pixel au bout de la ligne , le facteur d'interet est la difference entre le pixel et le pixel precedent
+                else if (i == image.length-1){
+                    res[i][j] = Math.abs(image[i][j]- image[i-1][j]);
+                }
+                // le facteur d’interet est la difference entre la valeur du pixel, et la moyenne des valeurs de ses voisins de gauche et de droite
+                else{
+                    res[i][j] = Math.abs(image[i][j]-(image[i-1][j]+image[i+1][j])/2);
+                }
+            }
+
+        }
+
+        return res;
+    }
 
     // Cree le graph depuis un tableau
     public static Graph toGraph(int[][] itr) {
@@ -196,10 +223,11 @@ public class SeamCarving
     }
 
 
-    public static ArrayList tritopo(Graph g){
+    public static ArrayList tritopo(Graph g,int depart){
 
         // Application du DFS
-        ArrayList<Integer> tmp = DFS.botched_dfs4(g,0);
+        ArrayList<Integer> tmp = DFSIteratif(g,depart);
+
         // Et on inverse la liste
         Collections.reverse(tmp);
 
@@ -246,7 +274,7 @@ public class SeamCarving
 
         int[][] res = new int[image.length][image[0].length - 1];
 
-        int compteur =1;
+        int compteur =0;
 
         for (int i = 0; i < image.length; i++) {
             boolean finded = false;
@@ -254,6 +282,7 @@ public class SeamCarving
 
                 // Si on trouve la valeur du compteur dans le chemin on decale les valeurs du tableau
                 if (!chemin.contains(compteur)) {
+                    //System.out.println(compteur);
                     if(finded) {
                         res[i][j-1] = image[i][j];
                     }
@@ -271,6 +300,99 @@ public class SeamCarving
         }
 
         return res;
+    }
+
+    // Retourne le tableau image modifie sans le chemin donnee
+    public static int[][] imageModifierAugmente(int[][] image, ArrayList<Integer> chemin){
+
+
+        int[][] res = new int[image.length][image[0].length +1];
+
+        int compteur =1;
+
+        for (int i = 0; i < image.length; i++) {
+            boolean finded = false;
+            for (int j = 0; j < image[0].length; j++) {
+
+
+                // Si on trouve la valeur du compteur dans le chemin on decale les valeurs du tableau
+                if (!chemin.contains(compteur)) {
+                    if(finded) {
+                        res[i][j+1] = image[i][j];
+                    }
+                    else {
+                        res[i][j] = image[i][j];
+                    }
+
+                }
+                else{
+                    finded = true;
+                }
+
+
+
+                compteur++;
+            }
+        }
+
+        return res;
+    }
+
+    
+
+
+    public static ArrayList<Integer> DFSIteratif(Graph g, int s){
+
+        ArrayList<Integer> res = new ArrayList<>();
+
+        Stack<Integer> uStack =new Stack<>();
+        Stack<Iterator<Edge>> itStack = new Stack<>();
+
+        boolean visited[] = new boolean[g.vertices()];
+
+
+        // On ajoute la paire s et it
+
+        uStack.push(s);
+        itStack.push(g.next(s).iterator());
+
+        // Tant que la pile n'est pas vide
+
+        while(!uStack.empty()){
+
+            // On récupert la pile u,it
+
+            int newU = uStack.peek();
+            Iterator<Edge> newIt = itStack.peek();
+
+            // Si il reste un voisin u non testé
+            if(newIt.hasNext()){
+
+                int v = newIt.next().to;
+
+                if(!visited[v]){
+                    visited[v] =true;
+
+                    uStack.push(v);
+                    itStack.push(g.next(v).iterator());
+                }
+
+            }
+
+            // Sinon on retire u,it de la pile
+            else{
+
+                uStack.pop();
+                itStack.pop();
+
+                res.add(newU);
+            }
+        }
+
+
+
+        return res;
+
     }
 
     // Creer le graph depuis un tableau sans qu'il contient le chemin donnee en parametre
@@ -355,4 +477,35 @@ public class SeamCarving
         return graphArrayList;
     }
 
+
+    public static int[][] imageModifierLine(int[][] image, ArrayList<Integer> chemin) {
+
+        int[][] res = new int[image.length-1][image[0].length];
+
+        int compteur =0;
+
+        for (int j = 0; j < image[0].length; j++) {
+            boolean trouve = false;
+            for (int i = 0; i < image.length; i++) {
+
+                // Si on trouve la valeur du compteur dans le chemin on decale les valeurs du tableau
+                if (!chemin.contains(compteur)) {
+                    if(trouve) {
+                        res[i-1][j] = image[i][j];
+                    }
+                    else {
+                        res[i][j] = image[i][j];
+                    }
+
+                }
+                else{
+                    trouve = true;
+                }
+
+                compteur++;
+            }
+        }
+
+        return res;
+    }
 }

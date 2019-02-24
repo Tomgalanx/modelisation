@@ -1,0 +1,21 @@
+
+Devoir de modelisation
+
+Realise par :	Gerphanion Thomas
+				Louarrat Wafaa
+				
+
+Repartition du travail :
+
+Le travail a été fait a deux, les jeudi après-midi sur la meme machine.
+
+
+Description de l’utilisation du logiciel :
+
+    Pour executer l'application l'utilisateur indique le nom de l'image qui sera préalablement rangé dans le dossier image.
+    Et indiquer si il souhaite réduire "R" ou augmenter l'image "A"
+
+
+Description des modifications apportees par rapport au sujet :
+
+    On a essayé de faire l'augmentation de l'image a partir de la recherche de chemin mais la fonction ne fonctionne pas encore.

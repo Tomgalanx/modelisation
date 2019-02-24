@@ -119,6 +119,37 @@ class DFS
 
     }
 
+	public static void botched_dfs4T(Graph g, int s){
+		Stack<Integer> stack = new Stack<Integer>();
+		boolean visited[] = new boolean[g.vertices()];
+		stack.push(s);
+		visited[s] = true;
+		System.out.println(s);
+		while (!stack.empty()){
+			boolean end = true;
+			/* (a) Soit u le sommet en haut de la pile */
+			/* (b) Si u a un voisin non visité, alors */
+			/*     (c) on le visite et on l'ajoute sur la pile */
+			/* Sinon */
+			/*     (d) on enlève u de la pile */
+
+			/* (a) */
+			int u = stack.peek();
+			for (Edge e: g.next(u))
+				if (!visited[e.to]) /* (b) */
+				{
+					visited[e.to] = true;
+					System.out.println(e.to);
+					stack.push(e.to); /*(c) */
+					end = false;
+					break;
+				}
+			if (end) /*(d)*/
+				stack.pop();
+		}
+		System.out.println(stack.capacity());
+	}
+
 
     
 

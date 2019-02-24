@@ -16,10 +16,10 @@ class Test
                 dfs(g,e.to);
     }
 
-    public static void testGraph(String nom) throws IOException {
+    public static void Reduire(String nom) throws IOException {
 
         // On met l'image sous forme d'un tableau de deux dimensions
-        int[][] test = SeamCarving.readpgm("modelisation/"+nom);
+        int[][] test = SeamCarving.readpgm("modelisation/image/"+nom);
 
         // On initialise le nombre de noeuds du graph
         int nbNoeud = test.length * test[0].length + 2;
@@ -33,13 +33,67 @@ class Test
             int[][] interest = SeamCarving.interest(test);
 
             // On genere le graph
-            Graph g = SeamCarving.toGraph(interest);
+            //Graph g = SeamCarving.toGraph(interest);
+            Graph g =new GraphImplicit(interest,interest[0].length,interest.length);
+
 
             // On applique le tri topologique sur le graph genere
-            ArrayList<Integer> tritopo = SeamCarving.tritopo(g);
+            ArrayList<Integer> tritopo = SeamCarving.tritopo(g,g.vertices()-2);
 
             // On applique Bellman pour recuperer le chemin de cout minimal
-            Integer[] parents = SeamCarving.Bellman(g, 0, nbNoeud, tritopo);
+            Integer[] parents = SeamCarving.Bellman(g, g.vertices()-2, g.vertices()-1, tritopo);
+
+            ArrayList<Integer> chemin = new ArrayList<>(g.vertices());
+
+
+
+            // On cherche les noeuds qui constituent le chemin de cout minimal
+            Integer parcours = parents[g.vertices() - 1];
+
+            while (parcours != -1) {
+                chemin.add(parcours);
+                parcours = parents[parcours];
+            }
+
+            // On retire le premier sommet qui n'est pas dans le tableau
+            chemin.remove(chemin.size()-1);
+
+            // On obtient le tableau avec les colonne modifie et on refait la boucle
+            test = SeamCarving.imageModifier(test, chemin);
+        }
+
+        // On ecrit le fichier .pgm
+        SeamCarving.writepgm(test, nom);
+
+        System.out.println("\n L'image a été réduite sous le nom de "+nom+"_réduite.pgm");
+    }
+
+    public static void Augmente(String nom) throws IOException {
+
+        // On met l'image sous forme d'un tableau de deux dimensions
+        int[][] test = SeamCarving.readpgm("modelisation/image/"+nom);
+
+        // On initialise le nombre de noeuds du graph
+        int nbNoeud = test.length * test[0].length + 2;
+
+        // On supprime 50 colonne de l'image
+        for (int i = 0; i < 20; i++) {
+
+            System.out.println("Nombre de ligne traité :"+i);
+
+            // On genere un tableau a deux dimensions qui contient les facteurs d'interet pour chaque pixel
+            int[][] interest = SeamCarving.interest(test);
+
+            // On genere le graph
+            Graph g = SeamCarving.toGraph(interest);
+
+            g = new GraphImplicit(interest,interest[0].length,interest.length);
+
+            // On applique le tri topologique sur le graph genere
+            ArrayList<Integer> tritopo = SeamCarving.tritopo(g,g.vertices()-2);
+
+            // On applique Bellman pour recuperer le chemin de cout minimal
+            Integer[] parents = SeamCarving.Bellman(g, g.vertices()-2, g.vertices()-1, tritopo);
 
             ArrayList<Integer> chemin = new ArrayList<>(g.vertices());
 
@@ -52,25 +106,21 @@ class Test
             }
 
             chemin.remove(chemin.size()-1);
-            chemin.remove(new Integer(0));
-
-
-            Collections.reverse(chemin);
 
             // On obtient le tableau avec les colonne modifie et on refait la boucle
-            test = SeamCarving.imageModifier(test, chemin);
+            test = SeamCarving.imageModifierAugmente(test, chemin);
         }
 
         // On ecrit le fichier .pgm
         SeamCarving.writepgm(test, nom);
 
-        System.out.println("\n L'image a été réduite sous le nom de "+nom);
+        System.out.println("\n L'image a été agrandite sous le nom de "+nom+"_réduite.pgm");
     }
 
 
     public  static  void testMonGraph(){
 
-        int[][] test = SeamCarving.readpgm("modelisation/ex1.pgm");
+        int[][] test = SeamCarving.readpgm("modelisation/image/ex1.pgm");
 
         int[][] interest = SeamCarving.interest(test);
 
@@ -83,7 +133,7 @@ class Test
         for(int i=0;i<50;i++) {
             int nbNoeud = interest.length * interest[0].length + 2;
 
-            ArrayList<Integer> triTop = SeamCarving.tritopo(g);
+            ArrayList<Integer> triTop = SeamCarving.tritopo(g,0);
 
 
             //ArrayList<Integer> pere = SeamCarving.Bellman(g, 0, nbNoeud, triTop);
@@ -111,15 +161,76 @@ class Test
 
     public static void main(String[] args) throws IOException {
 
-        if(args.length < 1){
-            System.out.println("Vous devez indiquer le nom de l'image");
+        if(args.length < 2){
+            System.out.println("Vous devez indiquer le nom de l'image qui est rangé dans le dossier image, R pour réduire et A pour augmenter");
         }
         else {
 
-            if(!args[0].contains(".pgm"))
+            if(args[0].contains(".pgm")){
+                System.out.println(args[0]);
+                if(args[1].equals("RL"))
+                    ReduireLine(args[0]);
+                else if(args[1].equals("A"))
+                    Augmente(args[0]);
+                else if(args[1].equals("RC"))
+                    Reduire(args[0]);
+            }
+
+            else {
                 System.out.println("L'image doit etre au format .pgm");
-            else
-                testGraph(args[0]);
+            }
         }
+    }
+
+    private static void ReduireLine(String nom) throws IOException {
+
+        // On met l'image sous forme d'un tableau de deux dimensions
+        int[][] test = SeamCarving.readpgm("modelisation/image/"+nom);
+
+        // On initialise le nombre de noeuds du graph
+        int nbNoeud = test.length * test[0].length + 2;
+
+        // On supprime 50 colonne de l'image
+        for (int i = 0; i < 50; i++) {
+
+            System.out.println("Nombre de ligne traité :"+i);
+
+            // On genere un tableau a deux dimensions qui contient les facteurs d'interet pour chaque pixel
+            int[][] interest = SeamCarving.interestLine(test);
+
+            // On genere le graph
+            //Graph g = SeamCarving.toGraph(interest);
+            Graph g =new GraphImplicit(interest,interest[0].length,interest.length);
+
+
+            // On applique le tri topologique sur le graph genere
+            ArrayList<Integer> tritopo = SeamCarving.tritopo(g,g.vertices()-2);
+
+            // On applique Bellman pour recuperer le chemin de cout minimal
+            Integer[] parents = SeamCarving.Bellman(g, g.vertices()-2, g.vertices()-1, tritopo);
+
+            ArrayList<Integer> chemin = new ArrayList<>(g.vertices());
+
+
+
+            // On cherche les noeuds qui constituent le chemin de cout minimal
+            Integer parcours = parents[g.vertices() - 1];
+
+            while (parcours != -1) {
+                chemin.add(parcours);
+                parcours = parents[parcours];
+            }
+
+            // On retire le premier sommet qui n'est pas dans le tableau
+            chemin.remove(chemin.size()-1);
+
+            // On obtient le tableau avec les colonne modifie et on refait la boucle
+            test = SeamCarving.imageModifierLine(test, chemin);
+        }
+
+        // On ecrit le fichier .pgm
+        SeamCarving.writepgm(test, nom);
+
+        System.out.println("\n L'image a été réduite sous le nom de "+nom+"_réduite.pgm");
     }
 }
